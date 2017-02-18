@@ -11,8 +11,9 @@ Motivation
 ---------------------------------------------------------------------------------------------------------------
 Systematically learning (re-learning) digitial logic design theory along with Verilog/System Verilog coding required to implement logic circuits.
 
-```
+
 Installation
+```
 Provide code examples and explanations of how to get the project.
 
 API Reference
