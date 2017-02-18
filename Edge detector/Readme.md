@@ -3,8 +3,11 @@ Synopsis
 
 This project includes the HDL (Verilog) code to implement a positive and negative edge detector circuit along with the testbench environment to test the working of the resulting circuit in a simulator (here Model Sim).
 
-```
+
 Code Example
+---------------------------------------------------------------------------------------------------------------
+```
+Show what the library does as concisely as possible, developers should be able to figure out how your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
 ```
 
 Motivation
