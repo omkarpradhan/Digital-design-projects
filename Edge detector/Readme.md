@@ -26,7 +26,7 @@ Depending on the size of the project, if it is small and simple enough the refer
 ```
 Tests
 ----------------------------------------------------------------------------------------------------------------------------------------
-Use 'testbench.sv' to instantiate an approprite memory module (e.g. SRAM_DFF) to which address and write data can be passed as input to the module and then data from the selected memory location can be read as an output from the module.
+Use 'testbench.sv' to instantiate an approprite memory module (e.g. EdgeDetector) to which address and write data can be passed as input to the module and then data from the selected memory location can be read as an output from the module.
 
 Contributors
 
