@@ -1,6 +1,7 @@
-Commonly used modules.
+##Synopsis
+This Readme lists and describes in brief commonly used digital logic modules included in this folder.
 
-#List of modules:
+##List of modules:
 
 ###decoder3to8
 
