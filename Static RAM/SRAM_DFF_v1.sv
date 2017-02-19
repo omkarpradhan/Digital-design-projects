@@ -115,4 +115,4 @@ always_comb begin
 			 ((add_rd == 3'b111)? reg7:32'h0000)))))));
 end//always_comb
 
-endmodule//SRAM_DFF
+endmodule//SRAM_DFF_v1
