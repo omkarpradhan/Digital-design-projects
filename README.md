@@ -1,6 +1,7 @@
-# Digital-design-projects
+## Digital-design-projects
 Digital logic design projects with HDL code
 
+1. Common Modules
 1. Edge detector
 2. Static RAM
   1. Static RAM with D-Flip Flops
