@@ -18,7 +18,7 @@
 // behavior. The testbench code and the DUT use unit delay
 // modeling of flip-flops for clarity.
 // -------------------------------------------------------
-module a2_testbench ();
+module testbench ();
 
 //timeunit      1ns;	// this one defines "how" to interptret numbers
                         //   encountered in the source
@@ -100,7 +100,7 @@ scoreboard scoreboard_inst (
 
 
 
-endmodule // a2_testbench
+endmodule // testbench
 
 
 
