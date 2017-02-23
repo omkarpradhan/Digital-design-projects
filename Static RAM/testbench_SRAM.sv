@@ -1,7 +1,8 @@
 // Assignment 2, SystemVerilog testbench for the
 //                   Static RAM (SRAM) modeled with flip-flops.
-// Author: Dave Sluiter
+// Author: Dave Sluiter, Omkar Pradhan
 // Date  : Feb 10, 2017
+//Updated: Feb 22, 2017
 
 // To make protected file: > vencrypt file.sv -o file_p.sv 
 
@@ -40,9 +41,9 @@ logic [31:0]    read_data;
 
 
 // --------------------------------------------------------
-// Instantiate the DUT (Device Under Test)
+	// Instantiate the DUT (Device Under Test) (Use the correct module name)
 // --------------------------------------------------------
-SRAM_DFF_v1b memory_8x32_inst (
+MyModuleName memory_8x32_inst (
 
     // memories generally do not have resets
 
