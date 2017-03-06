@@ -1,7 +1,9 @@
 // Author		: Omkar Pradhan
 // Date  		: 3/1/2017
 /* 
-Description	: FSM with timer to implement a traffic controller
+Description	: FSM with timer to implement a traffic controller.
+		  Dumb FSM with no NS/EW direction detect. Instead and additional SAFE state is defined that can be reached from EW direction
+		  and continues to NS direction.
 I/O: 
 ns_green,ns_yellow etc. are 1 bit signals that are set high when in the appropriate state
 */
