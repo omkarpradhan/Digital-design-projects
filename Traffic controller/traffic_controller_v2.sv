@@ -11,6 +11,9 @@ v2b - The output signals are instead used as flags .
 v2c - Flops should NOT be clocked with any clock s/g other than the system clock.
 v2d - Comb logic is explicitely derived from k-maps for the state transition instead of using the switch case
 ns_green,ns_yellow etc. are 1 bit signals that are set high when in the appropriate state
+v2e - Use next_s instead of s to address decode to avoid need the additional neg edge detector.
+	  Drop the 'cd' neg edge detection and simply use 'cd'
+v2f - make changes to avoid the async. feed back loop with 'cd'
 */
 
 module traffic_controller (
@@ -61,8 +64,18 @@ module traffic_controller (
 	logic[5:0] time_reg[7:0];//store  timer counts for all states in this 2-D array.
 	logic[5:0] init_count,next_count,curr_count;//input to the D-FFs
 	logic[1:0] flag_count,next_flag_count; //to count number of  NS states that were entered
-	logic cd,cd_negedge,cd_curr,ce;		
+	logic cd;		
 	
+	//initialize the timing registers
+	//if this is done inside the resetn (in ff) then the synthesis tools just removes these signals
+    assign time_reg[0] =  SAFE_TIME;
+    assign time_reg[1] =  GREEN_TIME;
+    assign time_reg[2] = YELLOW_TIME;
+    assign time_reg[3] = RED_TIME;
+    assign time_reg[4] = GREEN_TIME;
+    assign time_reg[5] = YELLOW_TIME;
+    assign time_reg[6] = RED_TIME;
+    assign time_reg[7] = 1;	
 //---------------FSM LOGIC	---------------------
 // State transition flops------------------------
 // Notes: 
@@ -75,19 +88,8 @@ module traffic_controller (
 	always_ff @(posedge clk or negedge resetn)
 		if(resetn == 1'b0) begin
 			s <= #1 SAFE;
-			d <=#1 EW;
-			
-			//initialize memory with hold times for the various states
-			time_reg[0] <= #1 SAFE_TIME;
-			time_reg[1] <= #1 GREEN_TIME;
-			time_reg[2] <= #1 YELLOW_TIME;
-			time_reg[3] <= #1 RED_TIME;
-			time_reg[4] <= #1 GREEN_TIME;
-			time_reg[5] <= #1 YELLOW_TIME;
-			time_reg[6] <= #1 RED_TIME;
-			//time_reg[7] <= #1 SAFE_TIME;
-			ce <= #1 1'b1;// ce can be be used to enable/disable counter based on any other condition. It simply set to 1 on reset in this case
-			
+			d <=#1 EW;		
+			//ce <= #1 1'b1;// ce can be be used to enable/disable counter based on any other condition. It simply set to 1 on reset in this case		
 		end else begin
 			s <= #1 next_s;// update flop input based on comb logic
 			d <= #1 next_d;// update flop input based on comb logic
@@ -124,7 +126,7 @@ module traffic_controller (
 		ew_yellow = s[2] & ~s[1] & s[0];
 		ew_red = ~s[2] | s[1];	
 		
-		init_count = time_reg[s];//'state hold time rergister' address decoding takes place here
+		init_count = time_reg[next_s];//'state hold time rergister' address decoding takes place here. Use next_s since that changes instaneously once 'cd' goes high
 	end//always_comb
 	
 //---------------TIMER ---------------------
@@ -132,38 +134,30 @@ module traffic_controller (
 	// Timer seq. logic --------------------
 	
 	//decrementing counter
+	// re-circ. mux latches in new value (if 'cd' high is detected)	
 	always_ff @(posedge clk or negedge resetn)
-		if((resetn == 1'b0) || (ce == 1'b0))begin
+		if((resetn == 1'b0))begin
 			//curr_count <= #1 6'b000000;
 			curr_count <= #1 SAFE_TIME_RESET-6'b1;//start with a SAFE_TIME_RESET
 		end else begin
-			curr_count <= #1 next_count - 6'b1;
+			if(cd)begin
+				curr_count <= #1 init_count-1;
+			end else begin
+				curr_count <= #1 next_count;
+			end
 		end
-		
-	// 'cd' neg. edge detector flop
-	// detect negative edge of cd and send this to re-circ mux for latching new/holding count
-	always_ff @(posedge clk or negedge resetn)
-		if((resetn == 1'b0) || (ce == 1'b0))//'ce' is strictly not necessary in the sensitivity list
-			cd_curr <= #1 1'b0;
-		else
-			cd_curr <= #1 cd;
+
 	
 	// Timer comb. logic --------------------
 	// Notes:
-	// cd is not directly used so that the count is delayed by one clock cycle
+	// cd is directly used
 	// What does this logic do:
-	// re-circ. mux latches in new value (if neg. edge of cd is detected)
-	always_comb begin
-		if(cd_negedge) begin
-			next_count = init_count-6'b1;
-		end else begin
-			next_count = curr_count;
-		end
-	end//always_comb
-	
+
+	//always_comb begin
 	//set cd to 1 if count has reached 0
-	assign cd =  ( ~ (|curr_count)); // pass curr_count through a NOR gate with ce -> cd is 1 when curr_count reaches 6'b0		
-	assign cd_negedge = cd_curr & ~cd; // 'cd' neg. edge detector comb. logic
+		 assign next_count = curr_count-1;
+		 assign cd =  ( ~ (|curr_count)); // pass curr_count through a NOR gate with ce -> cd is 1 when curr_count reaches 6'b0				
+	//end//always_comb
 	
 endmodule//timer
 	
