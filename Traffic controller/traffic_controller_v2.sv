@@ -14,6 +14,7 @@ ns_green,ns_yellow etc. are 1 bit signals that are set high when in the appropri
 v2e - Use next_s instead of s to address decode to avoid need the additional neg edge detector.
 	  Drop the 'cd' neg edge detection and simply use 'cd'
 v2f - make changes to avoid the async. feed back loop with 'cd'
+
 */
 
 module traffic_controller (
@@ -64,18 +65,8 @@ module traffic_controller (
 	logic[5:0] time_reg[7:0];//store  timer counts for all states in this 2-D array.
 	logic[5:0] init_count,next_count,curr_count;//input to the D-FFs
 	logic[1:0] flag_count,next_flag_count; //to count number of  NS states that were entered
-	logic cd;		
+	logic cd,cd_negedge,cd_curr,ce;		
 	
-	//initialize the timing registers
-	//if this is done inside the resetn (in ff) then the synthesis tools just removes these signals
-    assign time_reg[0] =  SAFE_TIME;
-    assign time_reg[1] =  GREEN_TIME;
-    assign time_reg[2] = YELLOW_TIME;
-    assign time_reg[3] = RED_TIME;
-    assign time_reg[4] = GREEN_TIME;
-    assign time_reg[5] = YELLOW_TIME;
-    assign time_reg[6] = RED_TIME;
-    assign time_reg[7] = 1;	
 //---------------FSM LOGIC	---------------------
 // State transition flops------------------------
 // Notes: 
@@ -88,8 +79,19 @@ module traffic_controller (
 	always_ff @(posedge clk or negedge resetn)
 		if(resetn == 1'b0) begin
 			s <= #1 SAFE;
-			d <=#1 EW;		
-			//ce <= #1 1'b1;// ce can be be used to enable/disable counter based on any other condition. It simply set to 1 on reset in this case		
+			d <=#1 EW;
+			
+			//initialize memory with hold times for the various states
+			time_reg[0] <= #1 SAFE_TIME;
+			time_reg[1] <= #1 GREEN_TIME;
+			time_reg[2] <= #1 YELLOW_TIME;
+			time_reg[3] <= #1 RED_TIME;
+			time_reg[4] <= #1 GREEN_TIME;
+			time_reg[5] <= #1 YELLOW_TIME;
+			time_reg[6] <= #1 RED_TIME;
+			//time_reg[7] <= #1 SAFE_TIME;
+			ce <= #1 1'b1;// ce can be be used to enable/disable counter based on any other condition. It simply set to 1 on reset in this case
+			
 		end else begin
 			s <= #1 next_s;// update flop input based on comb logic
 			d <= #1 next_d;// update flop input based on comb logic
@@ -136,7 +138,7 @@ module traffic_controller (
 	//decrementing counter
 	// re-circ. mux latches in new value (if 'cd' high is detected)	
 	always_ff @(posedge clk or negedge resetn)
-		if((resetn == 1'b0))begin
+		if((resetn == 1'b0) || (ce == 1'b0))begin
 			//curr_count <= #1 6'b000000;
 			curr_count <= #1 SAFE_TIME_RESET-6'b1;//start with a SAFE_TIME_RESET
 		end else begin
