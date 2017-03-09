@@ -1,5 +1,5 @@
 // Author		: Omkar Pradhan
-// Date  		: 2/182017
+// Date  		: 2/18/2017
 // Description	: A D-FF based 8 x 32 bit memory module
 /*
 I/O: 
